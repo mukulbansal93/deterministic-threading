@@ -30,7 +30,7 @@ public class DeterministicThreadPoolExecutor<T extends DeterministicThread> impl
         shutDownRequested = new AtomicBoolean(Boolean.FALSE);
         this.queues = new LinkedList<>();
         for (int i = 0; i < this.threadCount; i++) {
-            queues.add(i, new LinkedBlockingDeque<>());
+            queues.add(i, new LinkedBlockingQueue<>());
             startExecution(i);
         }
     }
