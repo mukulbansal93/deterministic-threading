@@ -16,12 +16,12 @@ public class DeterministicThreadingDemo {
 
     public static void main(String[] args) {
         DeterministicThreadPoolExecutor deterministicThreadPoolExecutor = DeterministicExecutors.newDeterministicFixedThreadPool(THREADS);
-        // Demostrating that tasks with same hash code will be executed by the same thread.
+        // Demonstrating that tasks with same hash code will be executed by the same thread.
         IntStream.range(0, 100).forEach(value -> {
             deterministicThreadPoolExecutor.execute(new SampleDeterministicThread(RANDOM.nextInt(THREADS)) {
             });
         });
-        // Demostrating that if all tasks have the same hash code, the execution becomes sequential and by only one thread.
+        // Demonstrating that if all tasks have the same hash code, the execution becomes sequential and by only one thread.
         IntStream.range(0, 100).forEach(value -> {
             deterministicThreadPoolExecutor.execute(new SampleDeterministicThread(THREADS - 1) {
             });
