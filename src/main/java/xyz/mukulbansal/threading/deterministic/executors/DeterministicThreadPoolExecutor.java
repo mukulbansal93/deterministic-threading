@@ -101,8 +101,7 @@ public class DeterministicThreadPoolExecutor<T extends DeterministicThread> impl
 
     @Override
     public boolean isShutdown() {
-        // TODO
-        return false;
+        return shutDownRequested.get();
     }
 
     @Override
