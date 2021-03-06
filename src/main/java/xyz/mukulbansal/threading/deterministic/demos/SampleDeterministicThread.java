@@ -1,6 +1,5 @@
 package xyz.mukulbansal.threading.deterministic.demos;
 
-import xyz.mukulbansal.threading.deterministic.exceptions.InterruptedRuntimeException;
 import xyz.mukulbansal.threading.deterministic.threads.DeterministicThread;
 
 /**
