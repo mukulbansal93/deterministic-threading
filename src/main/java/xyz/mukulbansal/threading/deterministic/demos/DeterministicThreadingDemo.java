@@ -21,7 +21,7 @@ public class DeterministicThreadingDemo {
             deterministicThreadPoolExecutor.execute(new SampleDeterministicThread(RANDOM.nextInt(THREADS)) {
             });
         });
-        // Demostrating that if all tasks have the hash code, the execution becomes sequential and by one one thread.
+        // Demostrating that if all tasks have the same hash code, the execution becomes sequential and by only one thread.
         IntStream.range(0, 100).forEach(value -> {
             deterministicThreadPoolExecutor.execute(new SampleDeterministicThread(THREADS) {
             });
