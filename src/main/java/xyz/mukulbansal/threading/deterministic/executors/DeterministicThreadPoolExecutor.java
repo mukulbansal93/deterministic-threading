@@ -11,7 +11,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * An implementation of Executor Service for determimistic delegation of tasks to the threads.
+ * An implementation of Executor Service for deterministic delegation of tasks to the threads.
  *
  * @author mukulbansal
  */
