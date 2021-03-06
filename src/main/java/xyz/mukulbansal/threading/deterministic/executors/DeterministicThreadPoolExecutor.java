@@ -17,8 +17,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class DeterministicThreadPoolExecutor<T extends DeterministicThread> implements ExecutorService {
 
-    private static final int CAPACITY = 10;
-
     private int threadCount;
     private Thread[] threads;
     private boolean[] threadActiveStatus;
@@ -32,7 +30,7 @@ public class DeterministicThreadPoolExecutor<T extends DeterministicThread> impl
         shutDownRequested = new AtomicBoolean(Boolean.FALSE);
         this.queues = new LinkedList<>();
         for (int i = 0; i < this.threadCount; i++) {
-            queues.add(i, new LinkedBlockingDeque<>(CAPACITY));
+            queues.add(i, new LinkedBlockingDeque<>());
             startExecution(i);
         }
     }
