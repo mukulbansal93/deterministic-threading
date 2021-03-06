@@ -80,14 +80,13 @@ public class DeterministicThreadPoolExecutor<T extends DeterministicThread> impl
      *
      * @param command
      */
-    @Override
-    public void execute(Runnable command) {
+    public void execute(T command) {
         if (shutDownRequested.get()) {
             throw new SecurityException(Constants.Mesages.SECURITY_MESSAGE);
         }
         int hash = command.hashCode() % threadCount;
         try {
-            queues.get(hash).put((T) command);
+            queues.get(hash).put(command);
         } catch (InterruptedException e) {
             throw new InterruptedRuntimeException(e);
         }
@@ -156,5 +155,14 @@ public class DeterministicThreadPoolExecutor<T extends DeterministicThread> impl
     public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
         // TODO
         return null;
+    }
+
+    @Override
+    @Deprecated
+    public void execute(Runnable command) {
+        if (command instanceof DeterministicThread) {
+            execute((T) command);
+        }
+        throw new UnsupportedOperationException(Constants.Mesages.INVALID_TASK);
     }
 }
