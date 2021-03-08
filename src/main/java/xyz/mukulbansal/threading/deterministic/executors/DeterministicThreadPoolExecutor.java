@@ -160,6 +160,7 @@ public class DeterministicThreadPoolExecutor<T extends DeterministicThread> impl
     public void execute(Runnable command) {
         if (command instanceof DeterministicThread) {
             execute((T) command);
+            return;
         }
         throw new UnsupportedOperationException(Constants.Mesages.INVALID_TASK);
     }
