@@ -23,6 +23,14 @@ public class DeterministicThreadPoolExecutor<T extends DeterministicThread> impl
     private List<BlockingQueue<T>> queues;
     private AtomicBoolean shutDownRequested;
 
+    public DeterministicThreadPoolExecutor(int threadCount, int queueSizePerThread) {
+        this(threadCount);
+        for (int i = 0; i < this.threadCount; i++) {
+            queues.add(i, new LinkedBlockingQueue<>(queueSizePerThread));
+            startExecution(i);
+        }
+    }
+
     public DeterministicThreadPoolExecutor(int threadCount) {
         this.threadCount = threadCount;
         this.threads = new Thread[threadCount];
