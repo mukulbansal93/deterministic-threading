@@ -21,6 +21,7 @@ public class DeterministicThreadPoolExecutor<T extends DeterministicThread> impl
     private Thread[] threads;
     private boolean[] threadActiveStatus;
     private List<BlockingQueue<T>> queues;
+    private boolean[] goingToReadFromQueue;
     private AtomicBoolean shutDownRequested;
 
     public DeterministicThreadPoolExecutor(int threadCount, int queueSizePerThread) {
@@ -34,6 +35,7 @@ public class DeterministicThreadPoolExecutor<T extends DeterministicThread> impl
     public DeterministicThreadPoolExecutor(int threadCount) {
         this.threadCount = threadCount;
         this.threads = new Thread[threadCount];
+        this.goingToReadFromQueue = new boolean[threadCount];
         this.threadActiveStatus = new boolean[threadCount];
         shutDownRequested = new AtomicBoolean(Boolean.FALSE);
         this.queues = new LinkedList<>();
@@ -52,7 +54,15 @@ public class DeterministicThreadPoolExecutor<T extends DeterministicThread> impl
         this.threadActiveStatus[i] = Boolean.TRUE;
         this.threads[i] = new Thread(() -> {
             while (this.threadActiveStatus[i]) {
-                T task = queues.get(i).poll();
+                T task = null;
+                try {
+                    this.goingToReadFromQueue[i] = true;
+                    task = queues.get(i).take();
+                    this.goingToReadFromQueue[i] = false;
+                } catch (InterruptedException e) {
+                    // Ignoring interrupted exception because shutdown consumers
+                    // interrupts waiting threads. This is a valid behavior.
+                }
                 if (null != task) {
                     task.run();
                 }
@@ -64,17 +74,27 @@ public class DeterministicThreadPoolExecutor<T extends DeterministicThread> impl
     @Override
     public void shutdown() {
         this.shutDownRequested = new AtomicBoolean(Boolean.TRUE);
-        boolean allStopped = Boolean.FALSE;
-        while (!allStopped) {
+
+        // Waiting till all queues get empty i.e. every last task in the queue is picked by a thread
+        int numberOfEmptyQueues = 0;
+        while(numberOfEmptyQueues < this.threads.length) {
             for (int i = 0; i < this.threads.length; i++) {
-                if (this.queues.get(i).isEmpty()) {
+                if (this.queues.get(i).isEmpty() && this.threadActiveStatus[i]) {
                     this.threadActiveStatus[i] = Boolean.FALSE;
+                    numberOfEmptyQueues++;
                 }
             }
-            allStopped = Boolean.TRUE;
-            for (Thread thread : this.threads) {
-                if (thread.isAlive()) {
-                    allStopped = Boolean.FALSE;
+        }
+
+        // Interrupting thread waiting on their respective queues
+        int numberOfThreadsStopped = 0;
+        while(numberOfThreadsStopped < this.threads.length) {
+            for (int i = 0; i < this.threads.length; i++) {
+                if(!this.threads[i].isAlive()){
+                    numberOfThreadsStopped++;
+                } else if (this.threads[i].isAlive() && this.goingToReadFromQueue[i]) {
+                    this.threads[i].interrupt();
+                    numberOfThreadsStopped++;
                 }
             }
         }
